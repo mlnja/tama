@@ -12,8 +12,8 @@ release:
 
     echo "Bumping $current → $next"
 
-    # Update Cargo.toml
-    sed -i.bak "0,/^version = \"$current\"/s//version = \"$next\"/" Cargo.toml
+    # Update Cargo.toml (portable: works on both GNU and BSD sed)
+    sed -i.bak "s/^version = \"$current\"/version = \"$next\"/" Cargo.toml
     rm Cargo.toml.bak
 
     # Update Cargo.lock
