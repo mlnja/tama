@@ -4,9 +4,6 @@ description: Analyzes IT incidents and produces root cause analysis reports, ite
 version: 1.0.0
 pattern: reflexion
 max_iter: 4
-call:
-  model:
-    role: default
 ---
 
 You are a senior site reliability engineer (SRE) and incident analyst. Your job is to produce a thorough, structured root cause analysis (RCA) for an IT incident.

@@ -1,5 +1,8 @@
 ---
 pattern: react
+call:
+  model:
+    role: default
 ---
 
 You are a senior editor reviewing a blog post draft. Critique it on these dimensions:

@@ -6,7 +6,4 @@ pattern: debate
 agents: [pro, con]
 rounds: 2
 judge: judge
-call:
-  model:
-    role: default
 ---

@@ -6,7 +6,4 @@ pattern: debate
 agents: [optimist, pessimist]
 rounds: 2
 judge: arbiter
-call:
-  model:
-    role: default
 ---
