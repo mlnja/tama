@@ -5,14 +5,21 @@ description: How to install tama and tamad on your machine.
 
 ## Prerequisites
 
-- **Rust** 1.76+ (for building from source)
 - **Docker** (for `tama brew`)
 - An API key for at least one supported LLM provider
 
-## Build from source
+## Homebrew (macOS / Linux)
 
 ```bash
-git clone https://github.com/your-org/tama
+brew install mlnja/tap/tama
+```
+
+## Build from source
+
+Requires **Rust** 1.76+.
+
+```bash
+git clone https://github.com/mlnja/tama
 cd tama
 cargo build --release
 ```
@@ -24,7 +31,7 @@ This produces two binaries:
 Add them to your PATH:
 
 ```bash
-export PATH="$PATH:/path/to/tama/target/release"
+export PATH="$PATH:$(pwd)/target/release"
 ```
 
 ## Verify
