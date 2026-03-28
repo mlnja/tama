@@ -92,6 +92,12 @@ export default defineConfig({
             { label: 'Deploying with brew', slug: 'guides/deploy' },
           ],
         },
+        {
+          label: 'About',
+          items: [
+            { label: 'Competitor Analysis', slug: 'about/competitor-analysis' },
+          ],
+        },
       ],
     }),
   ],
