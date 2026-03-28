@@ -27,8 +27,8 @@ pub fn list() -> Result<()> {
     })?;
 
     println!(
-        "{:<38} {:<20} {:<12} {:<8} {}",
-        "trace_id", "entrypoint", "status", "ms", "task"
+        "{:<38} {:<20} {:<12} {:<8} task",
+        "trace_id", "entrypoint", "status", "ms"
     );
     println!("{}", "-".repeat(100));
     for row in rows {
@@ -491,7 +491,7 @@ fn api_agent_timeline(span_id: &str) -> Result<String> {
     let mut system_prompt_sent = false;
     for (sid, kind, name, start_ms, end_ms) in child_spans {
         let duration_ms = end_ms - start_ms;
-        let step = name.splitn(3, ':').nth(1).unwrap_or(&name).to_string();
+        let step = name.split(':').nth(1).unwrap_or(&name).to_string();
         if kind == "llm" {
             if let Ok((model, system_prompt, response, in_tok, out_tok, temperature, role)) = conn.query_row(
                 "SELECT model, COALESCE(system_prompt,''), response, input_tokens, output_tokens, temperature, role FROM llm_calls WHERE span_id=?",

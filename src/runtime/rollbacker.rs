@@ -151,7 +151,7 @@ static ROLLBACKER: LazyLock<Mutex<Box<dyn Rollbacker + Send>>> =
     LazyLock::new(|| Mutex::new(Box::new(NoopRollbacker)));
 
 /// Replace the active rollbacker. Must be called before any agents run.
-pub fn install(r: impl Rollbacker + Send + 'static) {
+pub fn install(r: impl Rollbacker + 'static) {
     *ROLLBACKER.lock().unwrap() = Box::new(r);
 }
 

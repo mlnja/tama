@@ -2,7 +2,7 @@ use anyhow::{Context, Result};
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-use crate::skill::manifest::{AgentFile, AgentPattern, FsmNext};
+use crate::skill::manifest::{AgentFile, AgentPattern};
 use crate::skill::parser::parse_agent;
 
 pub struct AgentNode {
@@ -71,7 +71,8 @@ fn agent_refs(pattern: &AgentPattern) -> Vec<String> {
         // Terminal states (None) are routing markers with no agent file.
         AgentPattern::Fsm { states, .. } => states
             .iter()
-            .filter_map(|(name, next)| next.is_some().then(|| name.clone()))
+            .filter(|&(_name, next)| next.is_some())
+            .map(|(name, _next)| name.clone())
             .collect(),
         AgentPattern::Debate { agents, judge, .. } => {
             let mut refs = agents.clone();

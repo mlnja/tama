@@ -124,6 +124,12 @@ pub struct OtelTracer {
     enabled: bool,
 }
 
+impl Default for OtelTracer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl OtelTracer {
     pub fn new() -> Self {
         let enabled = std::env::var("OTEL_EXPORTER_OTLP_ENDPOINT").is_ok()
@@ -305,6 +311,12 @@ enum BufferedEvent {
         args_json: String,
         result: String,
     },
+}
+
+impl Default for BufferedTracer {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl BufferedTracer {

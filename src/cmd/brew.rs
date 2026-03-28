@@ -76,10 +76,10 @@ pub fn run() -> Result<()> {
     std::fs::copy(&tamad_path, ctx.path().join("tamad")).context("failed to copy tamad binary")?;
 
     if Path::new("agents").exists() {
-        copy_dir("agents", &ctx.path().join("agents"))?;
+        copy_dir("agents", ctx.path().join("agents"))?;
     }
     if Path::new("skills").exists() {
-        copy_dir("skills", &ctx.path().join("skills"))?;
+        copy_dir("skills", ctx.path().join("skills"))?;
     }
     std::fs::copy("tama.toml", ctx.path().join("tama.toml")).context("failed to copy tama.toml")?;
 

@@ -23,7 +23,7 @@ pub async fn run(
     body: &str,
     uses: &[String],
     max_iter: u32,
-    registry: &Arc<ModelRegistry>,
+    _registry: &Arc<ModelRegistry>,
     client: &LlmClient,
     input: &str,
     tracer: &mut dyn Tracer,

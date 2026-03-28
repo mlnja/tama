@@ -359,7 +359,7 @@ fn stdin_handler(rx: mpsc::Receiver<DebugRequest>) {
 // ── display handlers ──────────────────────────────────────────────────────────
 
 fn handle_before_call(
-    agent: &str,
+    _agent: &str,
     step: &str,
     model: &str,
     system: &str,
