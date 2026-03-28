@@ -1,6 +1,6 @@
 [package]
 name = "tama"
-version = "0.0.3"
+version = "0.0.4"
 edition = "2021"
 description = "Multi-agent AI framework — build, run, and trace agent pipelines from the command line"
 license = "Elastic-2.0"
