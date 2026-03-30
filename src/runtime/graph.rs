@@ -189,8 +189,8 @@ mod tests {
         states.insert(
             "draft".to_string(),
             Some(FsmNext::Conditional(vec![
-                HashMap::from([("good-enough".to_string(), "done".to_string())]),
-                HashMap::from([("needs-work".to_string(), "critique".to_string())]),
+                HashMap::from([("good-enough".to_string(), Some("done".to_string()))]),
+                HashMap::from([("needs-work".to_string(), Some("critique".to_string()))]),
             ])),
         );
         states.insert("done".to_string(), None); // terminal
@@ -218,8 +218,8 @@ mod tests {
         states.insert(
             "draft".to_string(),
             Some(FsmNext::Conditional(vec![
-                HashMap::from([("needs-work".to_string(), "critique".to_string())]),
-                HashMap::from([("good-enough".to_string(), "done".to_string())]),
+                HashMap::from([("needs-work".to_string(), Some("critique".to_string()))]),
+                HashMap::from([("good-enough".to_string(), Some("done".to_string()))]),
             ])),
         );
         states.insert(

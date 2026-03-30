@@ -1,0 +1,7 @@
+[project]
+name = "deep-research"
+entrypoint = "research-pipeline"
+
+[models]
+thinker = "anthropic:claude-sonnet-4-6"
+default = "anthropic:claude-sonnet-4-6"

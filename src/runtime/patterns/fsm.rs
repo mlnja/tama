@@ -58,10 +58,6 @@ pub async fn run(
                 return Ok(output);
             }
             Some(FsmNext::Unconditional(next_agent)) => {
-                if matches!(states.get(next_agent.as_str()), Some(None)) {
-                    eprintln!("  → fsm: → terminal '{next_agent}'");
-                    return Ok(output);
-                }
                 eprintln!("  → fsm: → '{next_agent}'");
                 prev_span_id = Some(output.span_id.clone());
                 current_input = output.value;
@@ -75,14 +71,18 @@ pub async fn run(
                     format!("FSM: no transition for key '{routing_key}' in state '{current_state}'")
                 })?;
 
-                if matches!(states.get(next_agent.as_str()), Some(None)) {
-                    eprintln!("  → fsm: → terminal '{next_agent}'");
-                    return Ok(output);
+                match next_agent {
+                    None => {
+                        eprintln!("  → fsm: → ~ (terminal)");
+                        return Ok(output);
+                    }
+                    Some(next_agent) => {
+                        eprintln!("  → fsm: → '{next_agent}'");
+                        prev_span_id = Some(output.span_id.clone());
+                        current_input = output.value;
+                        current_state = next_agent.to_string();
+                    }
                 }
-                eprintln!("  → fsm: → '{next_agent}'");
-                prev_span_id = Some(output.span_id.clone());
-                current_input = output.value;
-                current_state = next_agent.clone();
             }
         }
     }
@@ -90,15 +90,22 @@ pub async fn run(
     bail!("FSM exceeded {MAX_STEPS} steps without reaching a terminal state")
 }
 
-/// Returns the target agent name. `*` is a catch-all.
-fn resolve_conditional<'a>(conds: &'a [HashMap<String, String>], key: &str) -> Option<&'a String> {
-    let mut fallback: Option<&'a String> = None;
+/// Returns the transition target for a routing key.
+/// - `None` → no matching transition found (error)
+/// - `Some(None)` → matched, target is `~` (stop)
+/// - `Some(Some(name))` → matched, go to agent `name`
+/// `*` is a catch-all fallback.
+fn resolve_conditional<'a>(
+    conds: &'a [HashMap<String, Option<String>>],
+    key: &str,
+) -> Option<Option<&'a str>> {
+    let mut fallback: Option<Option<&'a str>> = None;
     for map in conds {
         if let Some(target) = map.get(key) {
-            return Some(target);
+            return Some(target.as_deref());
         }
         if let Some(target) = map.get("*") {
-            fallback = Some(target);
+            fallback = Some(target.as_deref());
         }
     }
     fallback
@@ -108,66 +115,68 @@ fn resolve_conditional<'a>(conds: &'a [HashMap<String, String>], key: &str) -> O
 mod tests {
     use super::*;
 
+    fn cond(pairs: &[(&str, Option<&str>)]) -> HashMap<String, Option<String>> {
+        pairs
+            .iter()
+            .map(|(k, v)| (k.to_string(), v.map(|s| s.to_string())))
+            .collect()
+    }
+
     #[test]
     fn resolve_exact_match() {
         let conds = vec![
-            std::collections::HashMap::from([("good-enough".to_string(), "done".to_string())]),
-            std::collections::HashMap::from([("needs-work".to_string(), "critique".to_string())]),
+            cond(&[("good-enough", Some("done"))]),
+            cond(&[("needs-work", Some("critique"))]),
         ];
-        assert_eq!(
-            resolve_conditional(&conds, "needs-work"),
-            Some(&"critique".to_string())
-        );
+        assert_eq!(resolve_conditional(&conds, "needs-work"), Some(Some("critique")));
     }
 
     #[test]
     fn resolve_first_match_wins() {
         let conds = vec![
-            std::collections::HashMap::from([("yes".to_string(), "state-a".to_string())]),
-            std::collections::HashMap::from([("yes".to_string(), "state-b".to_string())]),
+            cond(&[("yes", Some("state-a"))]),
+            cond(&[("yes", Some("state-b"))]),
         ];
-        assert_eq!(
-            resolve_conditional(&conds, "yes"),
-            Some(&"state-a".to_string())
-        );
+        assert_eq!(resolve_conditional(&conds, "yes"), Some(Some("state-a")));
     }
 
     #[test]
     fn resolve_catchall_wildcard() {
         let conds = vec![
-            std::collections::HashMap::from([("yes".to_string(), "accept".to_string())]),
-            std::collections::HashMap::from([("*".to_string(), "error-handler".to_string())]),
+            cond(&[("yes", Some("accept"))]),
+            cond(&[("*", Some("error-handler"))]),
         ];
-        assert_eq!(
-            resolve_conditional(&conds, "unknown-word"),
-            Some(&"error-handler".to_string())
-        );
+        assert_eq!(resolve_conditional(&conds, "unknown-word"), Some(Some("error-handler")));
     }
 
     #[test]
     fn resolve_exact_beats_catchall() {
         let conds = vec![
-            std::collections::HashMap::from([("yes".to_string(), "accept".to_string())]),
-            std::collections::HashMap::from([("*".to_string(), "fallback".to_string())]),
+            cond(&[("yes", Some("accept"))]),
+            cond(&[("*", Some("fallback"))]),
         ];
-        assert_eq!(
-            resolve_conditional(&conds, "yes"),
-            Some(&"accept".to_string())
-        );
+        assert_eq!(resolve_conditional(&conds, "yes"), Some(Some("accept")));
+    }
+
+    #[test]
+    fn resolve_tilde_target_means_stop() {
+        let conds = vec![
+            cond(&[("approved", None)]),
+            cond(&[("retry", Some("research"))]),
+        ];
+        assert_eq!(resolve_conditional(&conds, "approved"), Some(None));
+        assert_eq!(resolve_conditional(&conds, "retry"), Some(Some("research")));
     }
 
     #[test]
     fn resolve_no_match_no_catchall_returns_none() {
-        let conds = vec![std::collections::HashMap::from([(
-            "yes".to_string(),
-            "accept".to_string(),
-        )])];
+        let conds = vec![cond(&[("yes", Some("accept"))])];
         assert_eq!(resolve_conditional(&conds, "no"), None);
     }
 
     #[test]
     fn resolve_empty_conds_returns_none() {
-        let conds: Vec<std::collections::HashMap<String, String>> = vec![];
+        let conds: Vec<HashMap<String, Option<String>>> = vec![];
         assert_eq!(resolve_conditional(&conds, "anything"), None);
     }
 }

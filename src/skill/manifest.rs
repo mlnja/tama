@@ -128,7 +128,8 @@ pub enum FsmNext {
     Unconditional(String),
     /// Conditional: list of `{word: agent}` maps; first match wins.
     /// Use `"*"` as a catch-all default.
-    Conditional(Vec<HashMap<String, String>>),
+    /// Target can be `~` (null) to stop without transitioning to another agent.
+    Conditional(Vec<HashMap<String, Option<String>>>),
 }
 
 // ── Model config ──────────────────────────────────────────────────────────────

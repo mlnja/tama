@@ -182,7 +182,9 @@ fn generate_graph_data(graph: &AgentGraph) -> serde_json::Value {
                             FsmNext::Conditional(conds) => {
                                 for cond in conds {
                                     for (word, target) in cond {
-                                        edges.push(edge(state, target, word));
+                                        if let Some(target) = target {
+                                            edges.push(edge(state, target, word));
+                                        }
                                     }
                                 }
                             }
@@ -268,7 +270,12 @@ fn build_agent_detail(node: &AgentNode, skill_infos: &HashMap<String, SkillInfo>
                     Some(FsmNext::Unconditional(t)) => format!("→ {}", t),
                     Some(FsmNext::Conditional(conds)) => conds
                         .iter()
-                        .flat_map(|m| m.iter().map(|(w, t)| format!("{}: {}", w, t)))
+                        .flat_map(|m| {
+                            m.iter().map(|(w, t)| match t {
+                                Some(target) => format!("{}: {}", w, target),
+                                None => format!("{}: ~", w),
+                            })
+                        })
                         .collect::<Vec<_>>()
                         .join(", "),
                 };

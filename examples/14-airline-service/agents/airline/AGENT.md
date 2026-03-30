@@ -10,9 +10,8 @@ states:
     - baggage: baggage
     - booking: booking
   refunds:
-    - done: _end
+    - done: ~
     - escalate: triage
-  baggage: _end
-  booking: _end
-  _end:
+  baggage: ~
+  booking: ~
 ---
