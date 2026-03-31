@@ -9,9 +9,6 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/mlnja/tama/stargazers">
-    <img src="https://img.shields.io/github/stars/mlnja/tama?style=flat-square" alt="GitHub stars" />
-  </a>
   <a href="https://github.com/mlnja/tama/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/mlnja/tama?style=flat-square" alt="MIT license" />
   </a>
